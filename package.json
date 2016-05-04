@@ -1,0 +1,25 @@
+{
+  "name": "simplecachejs",
+  "version": "1.0.0",
+  "description": "A simple javascript cache for use in the browser or node",
+  "main": "simpleCache.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rosspace/simpleCacheJs.git"
+  },
+  "keywords": [
+    "cache",
+    "javascript",
+    "node",
+    "browser"
+  ],
+  "author": "Ross Pace",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rosspace/simpleCacheJs/issues"
+  },
+  "homepage": "https://github.com/rosspace/simpleCacheJs#readme"
+}
