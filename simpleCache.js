@@ -5,22 +5,23 @@
     typeof define === 'function' && define.amd ? define(factory) :
     global.simpleCache = factory()
 })(this, function () {
-    var cache = {};
-    var CacheItem = (function () {
-        function CacheItem(key, value, ttl) {
-            this.key = key;
-            this.value = value;
-            this.ttl = ttl;
-        }
-        CacheItem.prototype.decrimentLife = function () {
-            if (isNumber(this.timeout)) {
-                this.timeout--;
-                return this.timeout;
+    var cache = {},
+        timeoutRunning = false,
+        CacheItem = (function () {
+            function CacheItem(key, value, ttl) {
+                this.key = key;
+                this.value = value;
+                this.ttl = ttl;
             }
-            return 1; //alive
-        };
-        return CacheItem;
-    })();
+            CacheItem.prototype.decrimentLife = function () {
+                if (isNumber(this.ttl)) {
+                    this.ttl--;
+                    return this.ttl;
+                }
+                return 1; //alive
+            };
+            return CacheItem;
+        })();
     
     function getCacheItem(key) {
         return cache[key];
@@ -28,7 +29,7 @@
     
     function get(key) {
         var val = getCacheItem(key);
-        if (system.isObject(val)) {
+        if (isObject(val)) {
             return val.value;
         }
         return undefined;
@@ -37,6 +38,9 @@
     function set(key, value, ttl) {
         var item = new CacheItem(key, value, ttl);
         cache[key] = item;
+        
+        if (!timeoutRunning) startTimeoutCheck(); //start timeout checks
+        
         return item;
     }
     
@@ -53,10 +57,10 @@
     
     function removeAll() { cache = {}; }
     
-    function ensure(key, retriever, ttl) {
+    function ensure(key, factory, ttl) {
         var val = getCacheItem(key);
         if (!isObject(val)) {
-            val = set(key, retriever(), timeout);
+            val = set(key, factory(), ttl);
         }
         return val.value;
     }
@@ -67,9 +71,17 @@
                 remove(key);
             }
         }
-        setTimeout(checkTimeout, 1000); //check every second
+        startTimeoutCheck();
     }
-    checkTimeout();
+    
+    function startTimeoutCheck() {
+        if (Object.keys(cache).length) {
+            timeoutRunning = true;
+            setTimeout(checkTimeout, 1000); //check every second
+        } else {
+            timeoutRunning = false;
+        }
+    }
     
     function isNumber(v) {        
         return toString.call(v) == '[object Number]';
